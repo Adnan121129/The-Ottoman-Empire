@@ -1,6 +1,6 @@
 'use client';
 
-import { ContactShadows, OrbitControls } from '@react-three/drei';
+import { ContactShadows, Environment, Lightformer, OrbitControls } from '@react-three/drei';
 import { Canvas, useFrame } from '@react-three/fiber';
 import { useMemo, useRef } from 'react';
 import * as THREE from 'three';
@@ -12,7 +12,7 @@ import * as THREE from 'three';
 
 export type ArmoryItem = 'kilij' | 'yatagan' | 'kalkan' | 'cannon';
 
-const steel = { color: '#c9ccd1', metalness: 0.95, roughness: 0.22 } as const;
+const steel = { color: '#d5d8dd', metalness: 0.9, roughness: 0.25 } as const;
 const gilt = { color: '#c9a24a', metalness: 0.9, roughness: 0.3 } as const;
 const bronze = { color: '#a8743a', metalness: 0.85, roughness: 0.35 } as const;
 
@@ -101,8 +101,8 @@ function Yatagan() {
       </mesh>
       {/* The two "ears" of the pommel */}
       {[-1, 1].map((s) => (
-        <mesh key={s} position={[-0.78, -0.08 + s * 0.11, 0]} rotation-z={s * 0.6}>
-          <cylinderGeometry args={[0.1, 0.06, 0.04, 16]} />
+        <mesh key={s} position={[-0.76, -0.08 + s * 0.08, 0]} rotation-z={s * 0.7} scale={[0.1, 0.16, 0.05]}>
+          <sphereGeometry args={[1, 20, 14]} />
           <meshStandardMaterial color="#e9dfc8" roughness={0.55} />
         </mesh>
       ))}
@@ -260,14 +260,20 @@ function Display({ item }: { item: ArmoryItem }) {
 
 export default function ArmoryModel({ active, quality, item }: { active: boolean; quality: 'high' | 'medium' | 'low'; item: ArmoryItem }) {
   return (
-    <Canvas camera={{ position: [0, 2.2, 5.6], fov: 38 }} dpr={quality === 'high' ? [1, 1.75] : 1} frameloop={active ? 'always' : 'never'} gl={{ antialias: quality !== 'low' }}>
+    <Canvas camera={{ position: [0, 1.8, 4.6], fov: 38 }} dpr={quality === 'high' ? [1, 1.75] : 1} frameloop={active ? 'always' : 'never'} gl={{ antialias: quality !== 'low' }}>
       <color attach="background" args={['#0d0b09']} />
-      <ambientLight intensity={0.35} />
-      <spotLight position={[3, 7, 4]} angle={0.5} penumbra={0.7} intensity={70} color="#ffe2b0" />
-      <pointLight position={[-4, 2, -3]} intensity={18} color="#8fb0ff" />
+      <ambientLight intensity={0.5} />
+      <directionalLight position={[3, 7, 4]} intensity={2.2} color="#ffe2b0" />
+      <directionalLight position={[-4, 2, -3]} intensity={0.8} color="#8fb0ff" />
+      {/* Studio reflections generated locally (no HDR download) so metal reads as metal. */}
+      <Environment resolution={128}>
+        <Lightformer form="rect" intensity={3} color="#ffe6c4" position={[0, 5, -4]} scale={[8, 2, 1]} />
+        <Lightformer form="rect" intensity={1.5} color="#c9d8ff" position={[-5, 2, 3]} rotation-y={Math.PI / 2} scale={[6, 2, 1]} />
+        <Lightformer form="ring" intensity={2} color="#ffd59a" position={[4, 3, 4]} scale={2} />
+      </Environment>
       <Display item={item} />
       <mesh rotation-x={-Math.PI / 2} position={[0, -0.01, 0]}>
-        <circleGeometry args={[2.6, 64]} />
+        <circleGeometry args={[2.2, 64]} />
         <meshStandardMaterial color="#1a1511" roughness={0.9} />
       </mesh>
       {quality !== 'low' && <ContactShadows position={[0, 0, 0]} opacity={0.6} scale={8} blur={2.4} far={3} />}

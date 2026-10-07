@@ -137,14 +137,23 @@ function Houses({ year, count, avoid }: { year: number; count: number; avoid: TH
   const roof = useRef<THREE.InstancedMesh>(null);
   const placed = useMemo(() => {
     const rnd = mulberry32(1453);
-    const zones = DISTRICTS.filter((d) => year >= d.from);
+    const zones = DISTRICTS.filter((d) => year >= d.from).map((d) => {
+      const lons = d.ring.map((p) => p[0]);
+      const lats = d.ring.map((p) => p[1]);
+      return { ring: d.ring, minLon: Math.min(...lons), maxLon: Math.max(...lons), minLat: Math.min(...lats), maxLat: Math.max(...lats) };
+    });
+    const areas = zones.map((z) => (z.maxLon - z.minLon) * (z.maxLat - z.minLat));
+    const total = areas.reduce((a, b) => a + b, 0);
+    const pick = () => {
+      let r = rnd() * total;
+      for (let i = 0; i < zones.length; i++) if ((r -= areas[i]) <= 0) return zones[i];
+      return zones[zones.length - 1];
+    };
     const out: { x: number; z: number; w: number; d: number; h: number; r: number; c: number }[] = [];
     let guard = 0;
     while (out.length < count && guard++ < count * 40) {
-      const zone = zones[Math.floor(rnd() * zones.length)];
-      const lons = zone.ring.map((p) => p[0]);
-      const lats = zone.ring.map((p) => p[1]);
-      const p: LL = [Math.min(...lons) + rnd() * (Math.max(...lons) - Math.min(...lons)), Math.min(...lats) + rnd() * (Math.max(...lats) - Math.min(...lats))];
+      const zone = pick();
+      const p: LL = [zone.minLon + rnd() * (zone.maxLon - zone.minLon), zone.minLat + rnd() * (zone.maxLat - zone.minLat)];
       if (!inside(p, zone.ring)) continue;
       const v = toScene(...p);
       if (avoid.some((a) => a.distanceToSquared(v) < 2.6)) continue;
@@ -190,7 +199,7 @@ function Houses({ year, count, avoid }: { year: number; count: number; avoid: TH
   );
 }
 
-function Landmark({ b, year, selected, onSelect }: { b: Building; year: number; selected: boolean; onSelect: (id: string) => void }) {
+function Landmark({ b, year, selected, onSelect, labelLift }: { b: Building; year: number; selected: boolean; onSelect: (id: string) => void; labelLift: number }) {
   const geo = useMemo(() => landmarkGeometry(b, year), [b, year]);
   const pos = useMemo(() => toScene(b.istanbul!.lon, b.istanbul!.lat), [b]);
   const unfinished = b.endYear > year && b.type === 'mosque' && b.istanbul!.model !== 'hagia-sophia';
@@ -224,13 +233,13 @@ function Landmark({ b, year, selected, onSelect }: { b: Building; year: number; 
           )}
         </group>
       </group>
-      <Html position={[0, 2.6, 0]} center distanceFactor={26} zIndexRange={[20, 0]}>
+      <Html position={[0, labelLift, 0]} center zIndexRange={selected ? [30, 25] : [20, 0]}>
         <button
           onClick={() => onSelect(b.id)}
           aria-pressed={selected}
-          className={`whitespace-nowrap rounded-full border px-3 py-1 text-[13px] font-semibold shadow-lg transition ${selected ? 'border-gold bg-gold text-[#0a0908]' : 'border-gold/40 bg-black/70 text-[#ecd9a6] hover:bg-black'}`}
+          className={`whitespace-nowrap rounded-full border shadow-lg transition ${selected ? 'border-gold bg-gold px-3 py-1 text-[13px] font-semibold text-[#0a0908]' : 'border-gold/40 bg-black/70 px-2 py-0.5 text-[11px] font-medium text-[#ecd9a6] hover:bg-black'}`}
         >
-          {b.name.replace(/ Mosque$/, '')}
+          {shortName(b.name)}
           {unfinished ? ' (building)' : ''}
         </button>
       </Html>
@@ -238,8 +247,13 @@ function Landmark({ b, year, selected, onSelect }: { b: Building; year: number; 
   );
 }
 
-const HOME_TARGET = new THREE.Vector3(1, 0, 1);
-const HOME_POS = new THREE.Vector3(10, 26, 30);
+// Staggered label heights so neighbouring landmarks don't collide.
+const LABEL_LIFT: Record<string, number> = { suleymaniye: 3.4, 'yeni-cami': 1.6, 'blue-mosque': 1.4, 'hagia-sophia': 2.8, topkapi: 2.0, sehzade: 2.0 };
+
+const shortName = (name: string) => name.split(/,| and the /)[0].replace(/ Mosque$/, '');
+
+const HOME_TARGET = new THREE.Vector3(-1.5, 0, 1.5);
+const HOME_POS = new THREE.Vector3(4, 22, 25);
 
 function FlyTo({ focus, instant }: { focus: THREE.Vector3 | null; instant: boolean }) {
   const camera = useThree((s) => s.camera);
@@ -252,7 +266,7 @@ function FlyTo({ focus, instant }: { focus: THREE.Vector3 | null; instant: boole
     let toP: THREE.Vector3;
     if (focus) {
       const dir = camera.position.clone().sub(controls.target).setY(0).normalize();
-      toP = toT.clone().add(dir.multiplyScalar(9)).setY(7);
+      toP = toT.clone().add(dir.multiplyScalar(12)).setY(10);
     } else toP = HOME_POS.clone();
     anim.current = { t: instant ? 1 : 0, fromP: camera.position.clone(), toP, fromT: controls.target.clone(), toT };
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -279,7 +293,7 @@ function Scene({ eraYear, selectedId, onSelect, quality, reducedMotion }: { eraY
   const avoid = useMemo(() => visible.map((b) => toScene(b.istanbul!.lon, b.istanbul!.lat)), [visible]);
   const sel = visible.find((b) => b.id === selectedId);
   const focus = sel ? toScene(sel.istanbul!.lon, sel.istanbul!.lat) : null;
-  const houseCount = quality === 'high' ? 1600 : quality === 'medium' ? 900 : 450;
+  const houseCount = quality === 'high' ? 2200 : quality === 'medium' ? 1300 : 600;
 
   return (
     <>
@@ -305,13 +319,13 @@ function Scene({ eraYear, selectedId, onSelect, quality, reducedMotion }: { eraY
       </mesh>
       <Houses year={eraYear} count={houseCount} avoid={avoid} />
       {visible.map((b) => (
-        <Landmark key={b.id} b={b} year={eraYear} selected={b.id === selectedId} onSelect={onSelect} />
+        <Landmark key={b.id} b={b} year={eraYear} selected={b.id === selectedId} onSelect={onSelect} labelLift={LABEL_LIFT[b.id] ?? 2.2} />
       ))}
       {LABELS.map((l) => {
         const p = toScene(...l.at);
         return (
-          <Html key={l.text} position={[p.x, 0.4, p.z]} center distanceFactor={30} zIndexRange={[5, 0]} style={{ pointerEvents: 'none' }}>
-            <span className={`whitespace-nowrap font-display text-[15px] tracking-wide ${l.kind === 'water' ? 'italic text-[#9cc3cc]/80' : 'uppercase text-[#e8d6a8]/60'}`}>{l.text}</span>
+          <Html key={l.text} position={[p.x, 0.4, p.z]} center zIndexRange={[5, 0]} style={{ pointerEvents: 'none' }}>
+            <span className={`whitespace-nowrap font-display text-[14px] tracking-wide ${l.kind === 'water' ? 'italic text-[#9cc3cc]/80' : 'uppercase text-[#e8d6a8]/60'}`}>{l.text}</span>
           </Html>
         );
       })}
