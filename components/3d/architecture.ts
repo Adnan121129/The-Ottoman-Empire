@@ -101,7 +101,7 @@ export function mosqueGeometry(spec: MosqueSpec = {}): { stone: G; gold: G } {
 }
 
 /** Hagia Sophia: broad, low dome with buttresses and four minarets of different eras. */
-export function hagiaSophiaGeometry(): { stone: G; gold: G } {
+export function hagiaSophiaGeometry(minaretCount = 4): { stone: G; gold: G } {
   const parts: G[] = [];
   parts.push(place(box(5.4, 2.0, 4.4), 0, 1.0, 0));
   parts.push(place(box(5.8, 1.1, 5.2), 0, 0.55, 0));
@@ -111,7 +111,7 @@ export function hagiaSophiaGeometry(): { stone: G; gold: G } {
   parts.push(place(halfDome(1.15), 0, 2.0, 1.45, 1, 0.7, 1, Math.PI / 2));
   parts.push(place(halfDome(1.15), 0, 2.0, -1.45, 1, 0.7, 1, -Math.PI / 2));
   const heights = [4.4, 4.7, 4.9, 4.9];
-  [[-2.9, -2.4], [2.9, -2.4], [-2.9, 2.4], [2.9, 2.4]].forEach(([x, z], i) => minaret(heights[i], i < 2 ? 1 : 2, 0.13).forEach((g) => parts.push(place(g, x, 0, z))));
+  [[-2.9, -2.4], [2.9, -2.4], [-2.9, 2.4], [2.9, 2.4]].slice(0, minaretCount).forEach(([x, z], i) => minaret(heights[i], i < 2 ? 1 : 2, 0.13).forEach((g) => parts.push(place(g, x, 0, z))));
   const gold = [place(cyl(0.035, 0.035, 0.35, 6), 0, 3.45, 0)];
   return { stone: mergeGeometries(parts.map(nonIndexed)), gold: mergeGeometries(gold.map(nonIndexed)) };
 }
