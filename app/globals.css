@@ -1,0 +1,234 @@
+@import 'tailwindcss';
+
+/* ------------------------------------------------------------------ */
+/*  Design tokens                                                      */
+/* ------------------------------------------------------------------ */
+@theme {
+  --color-ink: #0a0908;
+  --color-night: #100e0c;
+  --color-charcoal: #161310;
+  --color-coal: #1e1a16;
+  --color-smoke: #2a241e;
+  --color-ash: #8f8676;
+  --color-burgundy: #4e1019;
+  --color-wine: #6b1624;
+  --color-crimson: #a31d33;
+  --color-ember: #c8283f;
+  --color-gold: #c9a24a;
+  --color-gold-light: #e8cd86;
+  --color-gold-dark: #8a6a28;
+  --color-bronze: #7a5532;
+  --color-ivory: #f4ecda;
+  --color-parchment: #e9dcc0;
+  --color-parchment-dark: #cdb98f;
+  --color-sepia: #3b2f22;
+  --color-emerald: #1d5a49;
+  --color-jade: #3a9a7b;
+  --color-sky-dusk: #2c2235;
+
+  --font-display: var(--font-cormorant), 'Cormorant Garamond', Georgia, serif;
+  --font-sans: var(--font-manrope), 'Manrope', system-ui, sans-serif;
+  --font-arabic: var(--font-amiri), 'Amiri', serif;
+
+  --ease-cinematic: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-silk: cubic-bezier(0.65, 0, 0.35, 1);
+
+  --animate-shimmer: shimmer 6s linear infinite;
+  --animate-float: float 8s ease-in-out infinite;
+  --animate-pulse-gold: pulse-gold 2.4s ease-in-out infinite;
+
+  @keyframes shimmer {
+    0% { background-position: -200% 0; }
+    100% { background-position: 200% 0; }
+  }
+  @keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+  }
+  @keyframes pulse-gold {
+    0%, 100% { box-shadow: 0 0 0 0 rgb(201 162 74 / 0.45); }
+    50% { box-shadow: 0 0 0 10px rgb(201 162 74 / 0); }
+  }
+}
+
+/* ------------------------------------------------------------------ */
+/*  Base                                                               */
+/* ------------------------------------------------------------------ */
+:root {
+  color-scheme: dark;
+  --grain-opacity: 0.06;
+}
+
+html {
+  background: var(--color-ink);
+  scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%;
+}
+
+html.reduce-motion {
+  scroll-behavior: auto;
+}
+
+body {
+  background: var(--color-ink);
+  color: var(--color-ivory);
+  font-family: var(--font-sans);
+  font-feature-settings: 'ss01', 'cv11';
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  overflow-x: hidden;
+}
+
+::selection {
+  background: rgb(201 162 74 / 0.35);
+  color: #fff;
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-gold-light);
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+
+/* Film grain overlay — a single tiny inline SVG, no network request. */
+.grain::after {
+  content: '';
+  position: fixed;
+  inset: -50%;
+  pointer-events: none;
+  z-index: 60;
+  opacity: var(--grain-opacity);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0.9 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  animation: grain 1.2s steps(6) infinite;
+}
+html.reduce-motion .grain::after {
+  animation: none;
+}
+@keyframes grain {
+  0% { transform: translate(0, 0); }
+  20% { transform: translate(-3%, 2%); }
+  40% { transform: translate(2%, -3%); }
+  60% { transform: translate(-2%, -1%); }
+  80% { transform: translate(3%, 3%); }
+  100% { transform: translate(0, 0); }
+}
+
+/* ------------------------------------------------------------------ */
+/*  Utilities                                                          */
+/* ------------------------------------------------------------------ */
+@utility label-caps {
+  font-family: var(--font-sans);
+  font-size: 0.7rem;
+  line-height: 1rem;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  font-weight: 600;
+}
+
+@utility display-title {
+  font-family: var(--font-display);
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  line-height: 0.95;
+}
+
+@utility text-gold-gradient {
+  background: linear-gradient(100deg, #e8cd86 0%, #f6e4b0 25%, #c9a24a 50%, #f6e4b0 75%, #e8cd86 100%);
+  background-size: 200% 100%;
+  background-position: 0% 0;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+@utility glass {
+  background: rgb(22 19 16 / 0.62);
+  backdrop-filter: blur(18px) saturate(140%);
+  -webkit-backdrop-filter: blur(18px) saturate(140%);
+  border: 1px solid rgb(232 205 134 / 0.12);
+}
+
+@utility hairline {
+  border-color: rgb(232 205 134 / 0.14);
+}
+
+@utility no-scrollbar {
+  scrollbar-width: none;
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+@utility prose-history {
+  font-size: 1.0625rem;
+  line-height: 1.8;
+  color: rgb(244 236 218 / 0.82);
+  & p + p {
+    margin-top: 1.1em;
+  }
+}
+
+/* Ottoman-inspired eight-pointed star tessellation, used very sparingly. */
+.pattern-girih {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='80' viewBox='0 0 80 80'%3E%3Cg fill='none' stroke='%23c9a24a' stroke-width='0.7'%3E%3Cpath d='M40 10 L48.3 31.7 L70 40 L48.3 48.3 L40 70 L31.7 48.3 L10 40 L31.7 31.7 Z'/%3E%3Cpath d='M18.8 18.8 L40 27.6 L61.2 18.8 L52.4 40 L61.2 61.2 L40 52.4 L18.8 61.2 L27.6 40 Z'/%3E%3Ccircle cx='40' cy='40' r='5'/%3E%3Cpath d='M0 0 L10 0 L0 10Z M80 0 L70 0 L80 10Z M0 80 L10 80 L0 70Z M80 80 L70 80 L80 70Z'/%3E%3C/g%3E%3C/svg%3E");
+  background-size: 80px 80px;
+}
+
+.parchment-surface {
+  background-color: var(--color-parchment);
+  background-image:
+    radial-gradient(ellipse at 20% 0%, rgb(255 255 255 / 0.5), transparent 60%),
+    radial-gradient(ellipse at 100% 100%, rgb(138 106 40 / 0.18), transparent 55%);
+  color: var(--color-sepia);
+}
+
+.vignette {
+  background: radial-gradient(ellipse at center, transparent 40%, rgb(0 0 0 / 0.7) 100%);
+}
+
+/* Scroll-driven fade for long editorial lines */
+.mask-fade-x {
+  mask-image: linear-gradient(90deg, transparent, #000 6%, #000 94%, transparent);
+}
+.mask-fade-b {
+  mask-image: linear-gradient(180deg, #000 70%, transparent);
+}
+
+/* Map styling */
+.map-land {
+  fill: #221d18;
+  stroke: rgb(232 205 134 / 0.28);
+  stroke-width: 0.5;
+  vector-effect: non-scaling-stroke;
+}
+.map-sea {
+  fill: #0c0f12;
+}
+
+/* Respect reduced-motion everywhere */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+html.reduce-motion *, html.reduce-motion *::before, html.reduce-motion *::after {
+  animation-duration: 0.01ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.01ms !important;
+}
+
+.sr-only-focusable:not(:focus) {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
