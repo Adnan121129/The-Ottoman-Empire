@@ -315,6 +315,8 @@ export interface Building {
   notes?: CertaintyNote[];
   sources: string[];
   accent?: Palette;
+  /** Optional photograph or artwork; replaces the stylized silhouette. */
+  image?: MediaImage;
 }
 
 export interface Era {

@@ -2,7 +2,7 @@
 
 import { motion } from 'motion/react';
 import Link from 'next/link';
-import { finalYears } from '@/data/narratives';
+import { finalYears, type Moment } from '@/data/narratives';
 import { getRuler } from '@/data/rulers';
 import { getFigure } from '@/data/people';
 import { Portrait } from '@/components/ui/Portrait';
@@ -78,6 +78,37 @@ export function TwoEndings() {
   );
 }
 
+export function FinalYearsTimeline({ moments, className }: { moments: Moment[]; className?: string }) {
+  const { reducedMotion } = useSettings();
+  return (
+    <ol className={cn('relative space-y-5 border-l border-white/10 pl-6 sm:pl-10', className)}>
+      {moments.map((m, i) => (
+        <motion.li
+          key={m.year + m.title}
+          initial={reducedMotion ? false : { opacity: 0, x: -20 }}
+          whileInView={{ opacity: 1, x: 0 }}
+          viewport={{ once: true, margin: '-60px' }}
+          transition={{ duration: 0.7, delay: Math.min(i * 0.03, 0.2) }}
+          className={cn('relative rounded-r-2xl border-l-2 p-6 sm:grid sm:grid-cols-[10rem_1fr] sm:gap-8', toneClass[m.tone ?? 'war'])}
+        >
+          <span className="absolute top-8 -left-[2.05rem] h-3 w-3 rotate-45 border border-gold/60 bg-ink sm:-left-[2.85rem]" aria-hidden="true" />
+          <div>
+            <p className="font-display text-3xl text-ivory/90">{m.year}</p>
+            {m.date && <p className="text-xs text-ash">{m.date}</p>}
+          </div>
+          <div className="mt-2 sm:mt-0">
+            <h3 className={cn('font-display text-2xl', m.tone === 'grave' ? 'text-[#e3c9cf]' : 'text-ivory')}>{m.title}</h3>
+            <p className="mt-2 leading-relaxed text-ivory/70">{m.text}</p>
+            {m.tone === 'grave' && m.title.includes('Armenian') && (
+              <SourcesList ids={['suny-desert', 'akcam-crime', 'brit-armenian-genocide', 'rogan-fall']} title="Sources on the Armenian Genocide" className="mt-4" />
+            )}
+          </div>
+        </motion.li>
+      ))}
+    </ol>
+  );
+}
+
 export function FinalYearsChapter({ compact = false, id = 'final-years' }: { compact?: boolean; id?: string }) {
   const moments = compact ? finalYears.filter((m) => ['1908', '1912–13', '1914', '1915–16', '1918', '1919–22'].includes(m.year)) : finalYears;
   return (
@@ -90,31 +121,7 @@ export function FinalYearsChapter({ compact = false, id = 'final-years' }: { com
         </h2>
         <p className="mt-6 max-w-2xl text-lg text-ivory/65">Revolution, wars on every frontier, mass atrocity, occupation and a new state rising in Anatolia. The last chapter of the empire is also its darkest.</p>
 
-        <ol className="relative mt-16 space-y-5 border-l border-white/10 pl-6 sm:pl-10">
-          {moments.map((m, i) => (
-            <motion.li
-              key={m.year + m.title}
-              initial={{ opacity: 0, x: -20 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true, margin: '-60px' }}
-              transition={{ duration: 0.7, delay: Math.min(i * 0.03, 0.2) }}
-              className={cn('relative rounded-r-2xl border-l-2 p-6 sm:grid sm:grid-cols-[10rem_1fr] sm:gap-8', toneClass[m.tone ?? 'war'])}
-            >
-              <span className="absolute top-8 -left-[2.05rem] h-3 w-3 rotate-45 border border-gold/60 bg-ink sm:-left-[2.85rem]" aria-hidden="true" />
-              <div>
-                <p className="font-display text-3xl text-ivory/90">{m.year}</p>
-                {m.date && <p className="text-xs text-ash">{m.date}</p>}
-              </div>
-              <div className="mt-2 sm:mt-0">
-                <h3 className={cn('font-display text-2xl', m.tone === 'grave' ? 'text-[#e3c9cf]' : 'text-ivory')}>{m.title}</h3>
-                <p className="mt-2 leading-relaxed text-ivory/70">{m.text}</p>
-                {m.tone === 'grave' && m.title.includes('Armenian') && (
-                  <SourcesList ids={['suny-desert', 'akcam-crime', 'brit-armenian-genocide', 'rogan-fall']} title="Sources on the Armenian Genocide" className="mt-4" />
-                )}
-              </div>
-            </motion.li>
-          ))}
-        </ol>
+        <FinalYearsTimeline moments={moments} className="mt-16" />
         {compact && (
           <Link href="/final-years/" className="mt-10 inline-block rounded-full border border-[#d07a88]/50 px-6 py-3 text-sm font-semibold text-[#f3a4ae] transition hover:bg-[#d07a88]/10">
             The full chapter: Mehmed VI, Abdülmecid II and the War of Independence →

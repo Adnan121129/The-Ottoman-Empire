@@ -9,7 +9,8 @@
     "start": "npx serve@14 out",
     "typecheck": "tsc --noEmit",
     "validate:data": "tsx scripts/validate-data.ts",
-    "generate:map": "node scripts/build-land.mjs"
+    "generate:map": "node scripts/build-land.mjs",
+    "capture:hero": "node scripts/capture-hero.mjs"
   },
   "engines": {
     "node": ">=20.9.0"

@@ -231,6 +231,19 @@ const skies: Record<string, [string, string]> = {
 };
 
 export function BuildingIllustration({ b, className, caption = true, decorative = false }: { b: Building; className?: string; caption?: boolean; decorative?: boolean }) {
+  if (b.image) {
+    return (
+      <figure className={cn('relative overflow-hidden', className)}>
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src={b.image.src} alt={decorative ? '' : b.image.alt} loading="lazy" decoding="async" className="h-full w-full object-cover" />
+        {caption && (
+          <figcaption className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/80 to-transparent px-3 pb-2 pt-6 text-[0.6rem] text-ivory/70">
+            {b.image.credit} · {b.image.license}
+          </figcaption>
+        )}
+      </figure>
+    );
+  }
   const [top, bottom] = skies[b.accent ?? 'gold'] ?? skies.gold;
   const id = `sky-${b.id}`;
   return (

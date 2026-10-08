@@ -46,6 +46,13 @@ function detectQuality(): Quality {
   const small = window.innerWidth < 820;
   const cores = nav.hardwareConcurrency ?? 4;
   const memory = nav.deviceMemory ?? 8;
+  // Without WebGL, 3D views fall back to the pre-rendered video and posters.
+  try {
+    const c = document.createElement('canvas');
+    if (!(c.getContext('webgl2') || c.getContext('webgl'))) return 'low';
+  } catch {
+    return 'low';
+  }
   if ((coarse && small) || cores <= 2 || memory <= 2) return 'low';
   if (coarse || cores <= 4 || memory <= 4) return 'medium';
   return 'high';
