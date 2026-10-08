@@ -84,7 +84,7 @@ export function ComparisonChart() {
       ) : (
         <>
           {/* Portrait row */}
-          <div className="mt-8 grid grid-cols-2 gap-4 md:grid-cols-4">
+          <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             {picked.map((r) => (
               <Link key={r.id} href={`/sultans/${r.id}/`} className="group rounded-3xl border hairline bg-white/[0.02] p-4 transition hover:border-gold/40">
                 <div className="flex items-center gap-3">
@@ -115,14 +115,14 @@ export function ComparisonChart() {
                     const v = m.value(r);
                     const items = m.items?.(r) ?? [];
                     return (
-                      <li key={r.id} className="group relative grid grid-cols-[7.5rem_1fr] items-center gap-3 py-1.5 outline-none" tabIndex={0} aria-label={`${r.name}: ${fmt(v, m.unit)}`}>
+                      <li key={r.id} className="group relative grid grid-cols-[6.5rem_1fr] items-center gap-3 py-1.5 outline-none sm:grid-cols-[7.5rem_1fr]" tabIndex={0} aria-label={`${r.name}: ${fmt(v, m.unit)}`}>
                         <span className="truncate text-sm text-ivory/80">{r.name}</span>
                         <span className="flex items-center gap-2">
-                          <span className="h-3.5 rounded-r-[4px]" style={{ width: `${Math.max(v > 0 ? 1.5 : 0, (v / maxByMetric[m.id]) * 82)}%`, background: color(r.id) }} aria-hidden="true" />
-                          <span className="text-sm tabular-nums text-ivory">{fmt(v, m.unit)}</span>
+                          <span className="h-3.5 rounded-r-[4px]" style={{ width: `${Math.max(v > 0 ? 1.5 : 0, (v / maxByMetric[m.id]) * 70)}%`, background: color(r.id) }} aria-hidden="true" />
+                          <span className="whitespace-nowrap text-sm tabular-nums text-ivory">{fmt(v, m.unit)}</span>
                         </span>
                         {items.length > 0 && (
-                          <span className="pointer-events-none invisible absolute left-[7.5rem] top-full z-20 mt-1 w-72 rounded-xl border hairline bg-night/95 p-3 text-xs text-ivory/85 shadow-xl group-hover:visible group-focus:visible" role="tooltip">
+                          <span className="pointer-events-none invisible absolute left-[6.5rem] right-0 top-full sm:left-[7.5rem] z-20 mt-1 max-w-72 rounded-xl border hairline bg-night/95 p-3 text-xs text-ivory/85 shadow-xl group-hover:visible group-focus:visible" role="tooltip">
                             {items.slice(0, 6).map((it) => (
                               <span key={it} className="block py-0.5">
                                 • {it}

@@ -239,8 +239,10 @@ export function MapCanvas({
         onPointerLeave={() => setHover(null)}
       >
         <defs>
+          {/* The coastline is emitted once and reused, keeping each map's HTML small. */}
+          <path id={`coast-${uid}`} d={LAND_PATH} />
           <clipPath id={`land-${uid}`}>
-            <path d={LAND_PATH} />
+            <use href={`#coast-${uid}`} />
           </clipPath>
           <radialGradient id={`sea-${uid}`} cx="0.55" cy="0.45" r="0.8">
             <stop offset="0" stopColor="#13202a" />
@@ -279,7 +281,7 @@ export function MapCanvas({
 
         <rect x={-MAP_WIDTH} y={-MAP_HEIGHT} width={MAP_WIDTH * 3} height={MAP_HEIGHT * 3} fill={`url(#sea-${uid})`} />
         {showGraticule && <path d={GRATICULE_PATH} fill="none" stroke="#c9a24a" strokeOpacity="0.07" strokeWidth={0.6 * k} />}
-        <path d={LAND_PATH} fill="#1f1a15" />
+        <use href={`#coast-${uid}`} fill="#1f1a15" />
 
         <g clipPath={`url(#land-${uid})`}>
           <g opacity={territoryOpacity}>
@@ -329,7 +331,7 @@ export function MapCanvas({
           </AnimatePresence>
           {showRivers && riverPaths.map((r) => <path key={r.id} d={r.d} fill="none" stroke="#5b8fb0" strokeOpacity="0.55" strokeWidth={1.1 * k} />)}
         </g>
-        <path d={LAND_PATH} fill="none" stroke="#e8cd86" strokeOpacity="0.32" strokeWidth={0.6 * k} pointerEvents="none" />
+        <use href={`#coast-${uid}`} fill="none" stroke="#e8cd86" strokeOpacity="0.32" strokeWidth={0.6 * k} pointerEvents="none" />
 
         {showRoutes &&
           routePaths.map((r) => (
