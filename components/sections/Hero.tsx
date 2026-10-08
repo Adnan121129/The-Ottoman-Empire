@@ -4,7 +4,7 @@ import { motion } from 'motion/react';
 import { ArrowDown, Compass } from 'lucide-react';
 import dynamic from 'next/dynamic';
 import Link from 'next/link';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useInView } from '@/hooks/useInView';
 import { useSettings } from '@/lib/providers';
 
@@ -34,6 +34,15 @@ export function Hero() {
   }, []);
 
   const use3D = ready && (quality !== 'low' || capture);
+  // Low-power devices, no WebGL or reduced motion: a pre-rendered loop of the same scene (or its still poster).
+  const useVideo = ready && !use3D && !capture;
+  const video = useRef<HTMLVideoElement>(null);
+  useEffect(() => {
+    const v = video.current;
+    if (!v) return;
+    if (inView && !reducedMotion) v.play().catch(() => {});
+    else v.pause();
+  }, [inView, reducedMotion, useVideo]);
   const ease = [0.22, 1, 0.36, 1] as const;
   const d = (n: number) => (reducedMotion ? 0 : n);
 
@@ -48,6 +57,26 @@ export function Hero() {
         />
       </svg>
       <div className="absolute inset-x-0 bottom-0 -z-10 h-[24%] bg-gradient-to-b from-[#2a1420] to-ink" aria-hidden="true" />
+
+      {useVideo && (
+        <motion.div className="absolute inset-0 -z-10" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: d(1.6) }}>
+          <video
+            ref={video}
+            className="h-full w-full object-cover"
+            muted
+            loop
+            playsInline
+            autoPlay={!reducedMotion}
+            preload={reducedMotion ? 'none' : 'auto'}
+            poster="/videos/hero-poster.jpg"
+            aria-label="Looping artistic reconstruction of Constantinople’s skyline at dusk"
+          >
+            <source src="/videos/hero.webm" type="video/webm" />
+            <source src="/videos/hero.mp4" type="video/mp4" />
+            <track kind="captions" src="/videos/hero.en.vtt" srcLang="en" label="English" default />
+          </video>
+        </motion.div>
+      )}
 
       {use3D && (
         <motion.div className="absolute inset-0 -z-10" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: d(2.2) }}>
