@@ -241,7 +241,7 @@ export function Timeline() {
               {/* Axis + entries */}
               <div className="relative">
                 <span className="absolute top-[3.5rem] right-0 left-0 hidden h-px bg-gradient-to-r from-gold/60 via-gold/30 to-gold/10 lg:block" aria-hidden="true" />
-                <ol className="grid gap-4 sm:grid-cols-2 lg:flex lg:gap-5">
+                <ol className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:flex lg:gap-5">
                   {entries.map((e) => (
                     <EntryCard key={e.id} entry={e} onOpen={setOpen} index={rulerIndex.get(e.id) ?? 0} />
                   ))}

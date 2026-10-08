@@ -150,7 +150,7 @@ export function BattleExplorer() {
   const usedEras = eras.filter((e) => battles.some((b) => b.eraId === e.id));
 
   return (
-    <div className="grid gap-10 lg:grid-cols-[22rem_1fr]">
+    <div className="grid grid-cols-1 gap-10 lg:grid-cols-[22rem_1fr]">
       <div className="lg:sticky lg:top-24 lg:max-h-[calc(100vh-7rem)] lg:overflow-y-auto lg:pr-2">
         <div className="space-y-3">
           <label className="block">

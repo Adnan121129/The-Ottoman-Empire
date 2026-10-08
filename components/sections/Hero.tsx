@@ -73,7 +73,8 @@ export function Hero() {
           >
             <source src="/videos/hero.webm" type="video/webm" />
             <source src="/videos/hero.mp4" type="video/mp4" />
-            <track kind="captions" src="/videos/hero.en.vtt" srcLang="en" label="English" default />
+            {/* Captions are available on request; the on-screen “Artistic reconstruction” label describes the scene. */}
+            <track kind="captions" src="/videos/hero.en.vtt" srcLang="en" label="English" />
           </video>
         </motion.div>
       )}
